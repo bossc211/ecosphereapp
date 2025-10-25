@@ -62,52 +62,60 @@ fun EcoSphereApp() {
 fun BottomBar(nav: NavHostController) {
     val backStackEntry by nav.currentBackStackEntryAsState()
 
+    fun isSelected(route: String) = backStackEntry?.destination?.route == route
+
     NavigationBar {
-        @Composable
-        fun BarItem(route: String, label: String) {
-            val selected = backStackEntry?.destination?.route == route
-            NavigationBarItem(
-                selected = selected,
-                onClick = { nav.navigate(route) },
-                label = { Text(label) },
-                icon = {
-                    Canvas(Modifier.size(24.dp)) {
-                        drawRect(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
-                    }
+        NavigationBarItem(
+            selected = isSelected("home"),
+            onClick = { nav.navigate("home") },
+            label = { Text("Home") },
+            icon = {
+                Canvas(Modifier.size(24.dp)) {
+                    drawRect(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
                 }
-            )
-        }
-
-        BarItem("home", "Home")
-        BarItem("dashboard", "Corporate")
-        BarItem("supplier", "Supplier")
-        BarItem("retrofits", "Retrofits")
-        BarItem("about", "About")
-    }
-}
-
-
-/** Row item for the bottom bar.
- *  NOTE: We fully qualify RowScope here to avoid any import ambiguity. */
-@Composable
-fun androidx.compose.foundation.layout.RowScope.NavItem(
-    nav: NavHostController,
-    route: String,
-    label: String
-) {
-    val backStack = nav.currentBackStackEntryAsState()
-    val selected = backStack.value?.destination?.route == route
-
-    NavigationBarItem(
-        selected = selected,
-        onClick = { nav.navigate(route) },
-        label = { Text(label) },
-        icon = {
-            Canvas(Modifier.size(24.dp)) {
-                drawRect(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
             }
-        }
-    )
+        )
+        NavigationBarItem(
+            selected = isSelected("dashboard"),
+            onClick = { nav.navigate("dashboard") },
+            label = { Text("Corporate") },
+            icon = {
+                Canvas(Modifier.size(24.dp)) {
+                    drawRect(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
+                }
+            }
+        )
+        NavigationBarItem(
+            selected = isSelected("supplier"),
+            onClick = { nav.navigate("supplier") },
+            label = { Text("Supplier") },
+            icon = {
+                Canvas(Modifier.size(24.dp)) {
+                    drawRect(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
+                }
+            }
+        )
+        NavigationBarItem(
+            selected = isSelected("retrofits"),
+            onClick = { nav.navigate("retrofits") },
+            label = { Text("Retrofits") },
+            icon = {
+                Canvas(Modifier.size(24.dp)) {
+                    drawRect(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
+                }
+            }
+        )
+        NavigationBarItem(
+            selected = isSelected("about"),
+            onClick = { nav.navigate("about") },
+            label = { Text("About") },
+            icon = {
+                Canvas(Modifier.size(24.dp)) {
+                    drawRect(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
+                }
+            }
+        )
+    }
 }
 
 @Composable
@@ -138,9 +146,9 @@ fun HomeScreen(nav: NavHostController) {
         item {
             Text(
                 "• Capture & validate data from invoices/meters\n" +
-                "• Optimize with hotspot insights & ROI\n" +
-                "• Enable via marketplace & tools\n" +
-                "• Finance upgrades with transaction-linked models"
+                        "• Optimize with hotspot insights & ROI\n" +
+                        "• Enable via marketplace & tools\n" +
+                        "• Finance upgrades with transaction-linked models"
             )
         }
     }
@@ -257,7 +265,7 @@ data class SupplierRow(val name: String, val score: Int, val data: Int, val stat
 @Composable
 fun SupplierDashboardScreen() {
     var filter by remember { mutableStateOf("All") }
-    val rows = remember {
+    val rows by remember {
         mutableStateOf(
             listOf(
                 SupplierRow("Alpha Coils", 72, 90, "Active"),
@@ -268,10 +276,10 @@ fun SupplierDashboardScreen() {
             )
         )
     }
-    val active = rows.value.count { it.status == "Active" }
-    val coverage = (rows.value.map { it.data }.average()).toInt()
-    val avgScore = (rows.value.map { it.score }.average()).toInt()
-    val openTasks = rows.value.count { it.data < 80 }
+    val active = rows.count { it.status == "Active" }
+    val coverage = (rows.map { it.data }.average()).toInt()
+    val avgScore = (rows.map { it.score }.average()).toInt()
+    val openTasks = rows.count { it.data < 80 }
 
     LazyColumn(Modifier.fillMaxSize().padding(16.dp)) {
         item {
@@ -304,14 +312,18 @@ fun SupplierDashboardScreen() {
                         FilterChip("At Risk", filter) { filter = "At Risk" }
                     }
                     Spacer(Modifier.height(8.dp))
+
+                    val filteredList = rows.filter { filter == "All" || it.status == filter }
+
+                    // Render items in a clear composable scope (no shadowing)
                     LazyColumn(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .heightIn(max = 320.dp),   // keeps the card from getting too tall; adjust as you like
+                            .heightIn(max = 320.dp),
                         verticalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
-                        items(filtered) { r ->
-                            SupplierCard(r)
+                        items(filteredList) { supplier ->
+                            SupplierCard(supplier)
                         }
                     }
                 }
@@ -356,10 +368,10 @@ fun RetrofitsScreen() {
     var retrofitItems by remember {
         mutableStateOf(
             listOf(
-                RetrofitItem("Alpha Coils","VFD for Motors",120f,"In Progress","2025-10-10"),
-                RetrofitItem("Beta Ltd","Solar Rooftop",240f,"Pending","2025-10-18"),
-                RetrofitItem("Gamma Gears","LED Lighting",35f,"Completed","2025-09-28"),
-                RetrofitItem("Delta Castings","Heat Pump",180f,"In Progress","2025-10-22")
+                RetrofitItem("Alpha Coils", "VFD for Motors", 120f, "In Progress", "2025-10-10"),
+                RetrofitItem("Beta Ltd", "Solar Rooftop", 240f, "Pending", "2025-10-18"),
+                RetrofitItem("Gamma Gears", "LED Lighting", 35f, "Completed", "2025-09-28"),
+                RetrofitItem("Delta Castings", "Heat Pump", 180f, "In Progress", "2025-10-22")
             )
         )
     }
@@ -375,7 +387,6 @@ fun RetrofitsScreen() {
             Button(onClick = { show = true }) { Text("+ Request Retrofit") }
         }
         Spacer(Modifier.height(12.dp))
-
         LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             items(retrofitItems) { r -> RetrofitRow(r) }
         }
@@ -407,7 +418,7 @@ fun RetrofitRow(r: RetrofitItem) {
 }
 
 @Composable
-fun NewRetrofitDialog(onDismiss: () -> Unit, onSubmit: (String,String,Float) -> Unit) {
+fun NewRetrofitDialog(onDismiss: () -> Unit, onSubmit: (String, String, Float) -> Unit) {
     var supplier by remember { mutableStateOf("") }
     var type by remember { mutableStateOf("Solar Rooftop") }
     var abate by remember { mutableStateOf("") }
