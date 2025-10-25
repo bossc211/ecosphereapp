@@ -1,3 +1,4 @@
+# .github/workflows/android-ci.yml
 name: Android CI (Build Debug APK)
 
 on:
@@ -8,6 +9,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: EcoSphere   # 👈 run Gradle from the project folder
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -30,4 +34,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: EcoSphere-debug-apk
-          path: app/build/outputs/apk/debug/app-debug.apk
+          path: EcoSphere/app/build/outputs/apk/debug/app-debug.apk  # 👈 matches the working dir
