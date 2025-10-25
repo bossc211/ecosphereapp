@@ -73,7 +73,8 @@ fun BottomBar(nav: NavHostController) {
     )
 
     NavigationBar {
-        tabs.forEach { (route, label) ->
+        // ✅ Use a plain for-loop (NOT forEach) so the body is a composable scope
+        for ((route, label) in tabs) {
             val selected = currentRoute == route
             NavigationBarItem(
                 selected = selected,
@@ -86,7 +87,6 @@ fun BottomBar(nav: NavHostController) {
                 },
                 label = { Text(label) },
                 icon = {
-                    // simple placeholder icon using Canvas (purely composable-safe)
                     Canvas(Modifier.size(24.dp)) {
                         drawRect(
                             if (selected) MaterialTheme.colorScheme.primary.copy(alpha = 0.35f)
@@ -224,14 +224,17 @@ fun SimpleLineChart(values: List<Float>, values2: List<Float>? = null) {
     Canvas(Modifier.fillMaxWidth().height(180.dp)) {
         val w = size.width; val h = size.height
         fun pathFor(list: List<Float>): Path {
-            val step = (w - 2*padX)/ (list.size - 1); val p = Path()
-            list.forEachIndexed { i, v ->
+            val step = (w - 2 * padX) / (list.size - 1)
+            val p = Path()
+            for (i in list.indices) {
+                val v = list[i]
                 val x = padX + i * step
-                val y = padY + (h - 2*padY) * (1 - (v - min) / (max - min))
+                val y = padY + (h - 2 * padY) * (1 - (v - min) / (max - min))
                 if (i == 0) p.moveTo(x, y) else p.lineTo(x, y)
-            }
-            return p
         }
+        return p
+}
+
         drawPath(pathFor(values), color = MaterialTheme.colorScheme.primary, alpha = 0.9f)
         values2?.let { drawPath(pathFor(it), color = Color(0xFF94A3B8), alpha = 0.9f) }
     }
