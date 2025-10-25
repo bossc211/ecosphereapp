@@ -62,42 +62,43 @@ fun EcoSphereApp() {
 
 @Composable
 fun BottomBar(nav: NavHostController) {
-    val backStackEntry by nav.currentBackStackEntryAsState()
+    val backStackEntry by androidx.navigation.compose.currentBackStackEntryAsState()
     val currentRoute = backStackEntry?.destination?.route
-    val tabs = listOf(
-        "home" to "Home",
-        "dashboard" to "Corporate",
-        "supplier" to "Supplier",
-        "retrofits" to "Retrofits",
-        "about" to "About"
-    )
 
     NavigationBar {
-        // ✅ Use a plain for-loop (NOT forEach) so the body is a composable scope
-        for ((route, label) in tabs) {
-            val selected = currentRoute == route
-            NavigationBarItem(
-                selected = selected,
-                onClick = {
-                    nav.navigate(route) {
-                        launchSingleTop = true
-                        popUpTo(nav.graph.startDestinationId) { saveState = true }
-                        restoreState = true
-                    }
-                },
-                label = { Text(label) },
-                icon = {
-                    Canvas(Modifier.size(24.dp)) {
-                        drawRect(
-                            if (selected) MaterialTheme.colorScheme.primary.copy(alpha = 0.35f)
-                            else MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
-                        )
-                    }
-                }
-            )
-        }
+        NavigationBarItem(
+            selected = currentRoute == "home",
+            onClick = { nav.navigate("home") { launchSingleTop = true; popUpTo(nav.graph.startDestinationId) { saveState = true }; restoreState = true } },
+            label = { Text("Home") },
+            icon = { Canvas(Modifier.size(24.dp)) { drawRect(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)) } }
+        )
+        NavigationBarItem(
+            selected = currentRoute == "dashboard",
+            onClick = { nav.navigate("dashboard") { launchSingleTop = true; popUpTo(nav.graph.startDestinationId) { saveState = true }; restoreState = true } },
+            label = { Text("Corporate") },
+            icon = { Canvas(Modifier.size(24.dp)) { drawRect(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)) } }
+        )
+        NavigationBarItem(
+            selected = currentRoute == "supplier",
+            onClick = { nav.navigate("supplier") { launchSingleTop = true; popUpTo(nav.graph.startDestinationId) { saveState = true }; restoreState = true } },
+            label = { Text("Supplier") },
+            icon = { Canvas(Modifier.size(24.dp)) { drawRect(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)) } }
+        )
+        NavigationBarItem(
+            selected = currentRoute == "retrofits",
+            onClick = { nav.navigate("retrofits") { launchSingleTop = true; popUpTo(nav.graph.startDestinationId) { saveState = true }; restoreState = true } },
+            label = { Text("Retrofits") },
+            icon = { Canvas(Modifier.size(24.dp)) { drawRect(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)) } }
+        )
+        NavigationBarItem(
+            selected = currentRoute == "about",
+            onClick = { nav.navigate("about") { launchSingleTop = true; popUpTo(nav.graph.startDestinationId) { saveState = true }; restoreState = true } },
+            label = { Text("About") },
+            icon = { Canvas(Modifier.size(24.dp)) { drawRect(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)) } }
+        )
     }
 }
+
 
 /* ---------------- Home ---------------- */
 
