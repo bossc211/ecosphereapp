@@ -20,7 +20,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.compose.foundation.layout.RowScope   // ← important for NavigationBarItem / weight
+import androidx.navigation.compose.currentBackStackEntryAsState   // ✅ important
+import androidx.compose.foundation.layout.RowScope               // ✅ for RowScope.NavItem / weight()
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -69,13 +70,12 @@ fun BottomBar(nav: NavHostController) {
     }
 }
 
-// Make this an extension on RowScope so NavigationBarItem/weight are valid
+/** Make this an extension on RowScope so NavigationBarItem & weight() are valid */
 @Composable
 fun RowScope.NavItem(nav: NavHostController, route: String, label: String) {
-    val current by nav.currentBackStackEntryFlow.collectAsState(
-        initial = nav.currentBackStackEntry
-    )
-    val selected = current?.destination?.route == route
+    val currentBackStackEntry by nav.currentBackStackEntryAsState()  // ✅ stable selection
+    val selected = currentBackStackEntry?.destination?.route == route
+
     NavigationBarItem(
         selected = selected,
         onClick = { nav.navigate(route) },
@@ -295,7 +295,7 @@ fun SupplierDashboardScreen() {
                     }
                     Spacer(Modifier.height(8.dp))
                     rows.value
-                        .filter { filter == "All" || (it.status == filter) }  // use ||, not `or`
+                        .filter { filter == "All" || (it.status == filter) }
                         .forEach { r -> SupplierCard(r) }
                 }
             }
