@@ -1,5 +1,8 @@
 package com.ecosphere
 
+import androidx.compose.foundation.layout.RowScope
+import androidx.navigation.compose.currentBackStackEntryAsState
+
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -334,9 +337,8 @@ fun SupplierCard(r: SupplierRow) {
 
 data class RetrofitItem(val supplier: String, val type: String, val abatement: Float, val status: String, val updated: String)
 
-@Composable
 fun RetrofitsScreen() {
-    var items by remember {
+    var retrofitItems by remember {
         mutableStateOf(
             listOf(
                 RetrofitItem("Alpha Coils","VFD for Motors",120f,"In Progress","2025-10-10"),
@@ -347,6 +349,7 @@ fun RetrofitsScreen() {
         )
     }
     var show by remember { mutableStateOf(false) }
+
     Column(Modifier.fillMaxSize().padding(16.dp)) {
         Row(
             Modifier.fillMaxWidth(),
@@ -357,16 +360,19 @@ fun RetrofitsScreen() {
             Button(onClick = { show = true }) { Text("+ Request Retrofit") }
         }
         Spacer(Modifier.height(12.dp))
+
+        // ✅ This is a composable scope; call composables here
         LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            items(items) { r -> RetrofitRow(r) }
+            items(retrofitItems) { r -> RetrofitRow(r) }
         }
     }
+
     if (show) NewRetrofitDialog(
         onDismiss = { show = false },
         onSubmit = { supplier, type, abate ->
-            items = listOf(
+            retrofitItems = listOf(
                 RetrofitItem(supplier, type, abate, "Pending", java.time.LocalDate.now().toString())
-            ) + items
+            ) + retrofitItems
             show = false
         }
     )
