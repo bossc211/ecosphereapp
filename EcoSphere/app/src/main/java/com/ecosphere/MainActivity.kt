@@ -1,8 +1,5 @@
 package com.ecosphere
 
-import androidx.compose.foundation.layout.RowScope
-import androidx.navigation.compose.currentBackStackEntryAsState
-
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -23,8 +20,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.compose.currentBackStackEntryAsState   // ✅ important
-import androidx.compose.foundation.layout.RowScope               // ✅ for RowScope.NavItem / weight()
+import androidx.navigation.compose.currentBackStackEntryAsState
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -73,11 +69,16 @@ fun BottomBar(nav: NavHostController) {
     }
 }
 
-/** Make this an extension on RowScope so NavigationBarItem & weight() are valid */
+/** Row item for the bottom bar.
+ *  NOTE: We fully qualify RowScope here to avoid any import ambiguity. */
 @Composable
-fun RowScope.NavItem(nav: NavHostController, route: String, label: String) {
-    val currentBackStackEntry by nav.currentBackStackEntryAsState()  // ✅ stable selection
-    val selected = currentBackStackEntry?.destination?.route == route
+fun androidx.compose.foundation.layout.RowScope.NavItem(
+    nav: NavHostController,
+    route: String,
+    label: String
+) {
+    val backStack = nav.currentBackStackEntryAsState()
+    val selected = backStack.value?.destination?.route == route
 
     NavigationBarItem(
         selected = selected,
@@ -119,9 +120,9 @@ fun HomeScreen(nav: NavHostController) {
         item {
             Text(
                 "• Capture & validate data from invoices/meters\n" +
-                        "• Optimize with hotspot insights & ROI\n" +
-                        "• Enable via marketplace & tools\n" +
-                        "• Finance upgrades with transaction-linked models"
+                "• Optimize with hotspot insights & ROI\n" +
+                "• Enable via marketplace & tools\n" +
+                "• Finance upgrades with transaction-linked models"
             )
         }
     }
@@ -148,20 +149,8 @@ fun CorporateDashboardScreen() {
         }
         item {
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                KPI(
-                    title = "Monthly Emissions (tCO₂e)",
-                    value = "% ,d".format(e),
-                    delta = "↓ $eDelta% vs last month",
-                    good = true,
-                    modifier = Modifier.weight(1f)
-                )
-                KPI(
-                    title = "Savings This Month (₹)",
-                    value = "₹ %,d".format((s * 1e7).toInt()),
-                    delta = "↑ $sDelta% MoM",
-                    good = true,
-                    modifier = Modifier.weight(1f)
-                )
+                KPI("Monthly Emissions (tCO₂e)", "% ,d".format(e), "↓ $eDelta% vs last month", true, Modifier.weight(1f))
+                KPI("Savings This Month (₹)", "₹ %,d".format((s * 1e7).toInt()), "↑ $sDelta% MoM", true, Modifier.weight(1f))
             }
         }
         item { Spacer(Modifier.height(12.dp)) }
@@ -337,6 +326,7 @@ fun SupplierCard(r: SupplierRow) {
 
 data class RetrofitItem(val supplier: String, val type: String, val abatement: Float, val status: String, val updated: String)
 
+@Composable
 fun RetrofitsScreen() {
     var retrofitItems by remember {
         mutableStateOf(
@@ -361,7 +351,6 @@ fun RetrofitsScreen() {
         }
         Spacer(Modifier.height(12.dp))
 
-        // ✅ This is a composable scope; call composables here
         LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             items(retrofitItems) { r -> RetrofitRow(r) }
         }
