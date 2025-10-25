@@ -20,6 +20,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.compose.foundation.layout.RowScope   // ← important for NavigationBarItem / weight
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -28,16 +29,25 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EcoSphereApp() {
     val nav = rememberNavController()
-    MaterialTheme(colorScheme = lightColorScheme(
-        primary = Color(0xFF059669),
-        secondary = Color(0xFF065F46)
-    )) {
-        Scaffold(topBar = { TopAppBar(title = { Text("EcoSphere") }) },
-                 bottomBar = { BottomBar(nav) }) { inner ->
-            NavHost(navController = nav, startDestination = "home", modifier = Modifier.padding(inner)) {
+    MaterialTheme(
+        colorScheme = lightColorScheme(
+            primary = Color(0xFF059669),
+            secondary = Color(0xFF065F46)
+        )
+    ) {
+        Scaffold(
+            topBar = { TopAppBar(title = { Text("EcoSphere") }) },
+            bottomBar = { BottomBar(nav) }
+        ) { inner ->
+            NavHost(
+                navController = nav,
+                startDestination = "home",
+                modifier = Modifier.padding(inner)
+            ) {
                 composable("home") { HomeScreen(nav) }
                 composable("dashboard") { CorporateDashboardScreen() }
                 composable("supplier") { SupplierDashboardScreen() }
@@ -58,38 +68,69 @@ fun BottomBar(nav: NavHostController) {
         NavItem(nav, "about", "About")
     }
 }
+
+// Make this an extension on RowScope so NavigationBarItem/weight are valid
 @Composable
-private fun NavItem(nav: NavHostController, route: String, label: String) {
-    val current by nav.currentBackStackEntryFlow.collectAsState(initial = nav.currentBackStackEntry)
+fun RowScope.NavItem(nav: NavHostController, route: String, label: String) {
+    val current by nav.currentBackStackEntryFlow.collectAsState(
+        initial = nav.currentBackStackEntry
+    )
     val selected = current?.destination?.route == route
-    NavigationBarItem(selected = selected, onClick = { nav.navigate(route) }, label = { Text(label) }, icon = { Canvas(Modifier.size(24.dp)) { drawRect(MaterialTheme.colorScheme.primary.copy(alpha=0.2f)) } })
+    NavigationBarItem(
+        selected = selected,
+        onClick = { nav.navigate(route) },
+        label = { Text(label) },
+        icon = {
+            Canvas(Modifier.size(24.dp)) {
+                drawRect(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
+            }
+        }
+    )
 }
 
 @Composable
 fun HomeScreen(nav: NavHostController) {
     LazyColumn(Modifier.fillMaxSize().padding(16.dp)) {
         item {
-            Text("Powering Net‑Zero Supply Chains", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.ExtraBold)
+            Text(
+                "Powering Net-Zero Supply Chains",
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.ExtraBold
+            )
+        }
+        item {
             Spacer(Modifier.height(6.dp))
-            Text("Measure, optimize and finance Scope‑3 decarbonization by activating MSME suppliers.")
+            Text("Measure, optimize and finance Scope-3 decarbonization by activating MSME suppliers.")
+        }
+        item {
             Spacer(Modifier.height(12.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Button(onClick = { nav.navigate("dashboard") }) { Text("Corporate Dashboard") }
                 OutlinedButton(onClick = { nav.navigate("supplier") }) { Text("Supplier Dashboard") }
             }
         }
-        item { Spacer(Modifier.height(16.dp)) }
-        item { Text("Solution: Capture → Optimize → Enable → Finance", fontWeight = FontWeight.SemiBold) }
-        item { Text("• Capture & validate data from invoices/meters\n• Optimize with hotspot insights & ROI\n• Enable via marketplace & tools\n• Finance upgrades with transaction‑linked models") }
+        item {
+            Spacer(Modifier.height(16.dp))
+            Text("Solution: Capture → Optimize → Enable → Finance", fontWeight = FontWeight.SemiBold)
+        }
+        item {
+            Text(
+                "• Capture & validate data from invoices/meters\n" +
+                        "• Optimize with hotspot insights & ROI\n" +
+                        "• Enable via marketplace & tools\n" +
+                        "• Finance upgrades with transaction-linked models"
+            )
+        }
     }
 }
 
-// ---------------- Corporate Dashboard ----------------
+/* ---------------- Corporate Dashboard ---------------- */
+
 @Composable
 fun CorporateDashboardScreen() {
     val emissions = listOf(1120,1080,1040,980,960,940,910,900,880,860,840,820)
-    val savings = listOf(6.2,6.8,7.1,8.0,8.6,9.2,9.8,10.2,10.7,11.3,11.8,12.4)
-    val target  = listOf(6.0,6.5,7.0,7.5,8.0,8.5,9.0,9.5,10.0,10.5,11.0,11.5)
+    val savings   = listOf(6.2,6.8,7.1,8.0,8.6,9.2,9.8,10.2,10.7,11.3,11.8,12.4)
+    val target    = listOf(6.0,6.5,7.0,7.5,8.0,8.5,9.0,9.5,10.0,10.5,11.0,11.5)
 
     val m = java.util.Calendar.getInstance().get(java.util.Calendar.MONTH)
     val e = emissions[m]; val ePrev = emissions[(m-1).coerceAtLeast(0)]
@@ -98,38 +139,82 @@ fun CorporateDashboardScreen() {
     val sDelta = ((s - sPrev) / sPrev * 100).let { String.format("%.1f", it) }
 
     LazyColumn(Modifier.fillMaxSize().padding(16.dp)) {
-        item { Text("Corporate Portal — Overview", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold) }
-        item { Spacer(Modifier.height(8.dp)) }
+        item {
+            Text("Corporate Portal — Overview", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+            Spacer(Modifier.height(8.dp))
+        }
         item {
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                KPI("Monthly Emissions (tCO₂e)", "% ,d".format(e), "↓ $eDelta% vs last month", true)
-                KPI("Savings This Month (₹)", "₹ %,d".format((s * 1e7).toInt()), "↑ $sDelta% MoM", true)
+                KPI(
+                    title = "Monthly Emissions (tCO₂e)",
+                    value = "% ,d".format(e),
+                    delta = "↓ $eDelta% vs last month",
+                    good = true,
+                    modifier = Modifier.weight(1f)
+                )
+                KPI(
+                    title = "Savings This Month (₹)",
+                    value = "₹ %,d".format((s * 1e7).toInt()),
+                    delta = "↑ $sDelta% MoM",
+                    good = true,
+                    modifier = Modifier.weight(1f)
+                )
             }
         }
         item { Spacer(Modifier.height(12.dp)) }
         item {
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                KPI("Retrofit Requests — In Progress", "2", "Across priority suppliers", null)
-                KPI("Renewable Energy Adoption", "16%", "On track", true)
+                KPI("Retrofit Requests — In Progress", "2", "Across priority suppliers", null, Modifier.weight(1f))
+                KPI("Renewable Energy Adoption", "16%", "On track", true, Modifier.weight(1f))
             }
         }
         item { Spacer(Modifier.height(16.dp)) }
-        item { Card(Modifier.fillMaxWidth()) { Column(Modifier.padding(12.dp)) { Text("Monthly Emissions Trend (tCO₂e)", fontWeight = FontWeight.SemiBold); Spacer(Modifier.height(8.dp)); SimpleLineChart(values = emissions.map{it.toFloat()}) } } }
+        item {
+            Card(Modifier.fillMaxWidth()) {
+                Column(Modifier.padding(12.dp)) {
+                    Text("Monthly Emissions Trend (tCO₂e)", fontWeight = FontWeight.SemiBold)
+                    Spacer(Modifier.height(8.dp))
+                    SimpleLineChart(values = emissions.map { it.toFloat() })
+                }
+            }
+        }
         item { Spacer(Modifier.height(12.dp)) }
-        item { Card(Modifier.fillMaxWidth()) { Column(Modifier.padding(12.dp)) { Text("Savings vs Target (₹ crore)", fontWeight = FontWeight.SemiBold); Spacer(Modifier.height(8.dp)); SimpleLineChart(values = target.map{it.toFloat()}, values2 = savings.map{it.toFloat()}) } } }
+        item {
+            Card(Modifier.fillMaxWidth()) {
+                Column(Modifier.padding(12.dp)) {
+                    Text("Savings vs Target (₹ crore)", fontWeight = FontWeight.SemiBold)
+                    Spacer(Modifier.height(8.dp))
+                    SimpleLineChart(values = target.map { it.toFloat() }, values2 = savings.map { it.toFloat() })
+                }
+            }
+        }
     }
 }
 
 @Composable
-fun KPI(title: String, value: String, delta: String, good: Boolean?) {
-    Card(Modifier.weight(1f)) {
+fun KPI(
+    title: String,
+    value: String,
+    delta: String,
+    good: Boolean?,
+    modifier: Modifier = Modifier
+) {
+    Card(modifier) {
         Column(Modifier.padding(12.dp)) {
             Text(title, color = Color(0xFF64748B), style = MaterialTheme.typography.labelSmall)
             Spacer(Modifier.height(6.dp))
             Text(value, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.ExtraBold)
             Spacer(Modifier.height(4.dp))
-            val chipColor = when (good) { true -> Color(0xFFECFDF5); false -> Color(0xFFFEE2E2); else -> Color(0xFFF1F5F9) }
-            AssistChip(onClick = {}, label = { Text(delta) }, colors = AssistChipDefaults.assistChipColors(containerColor = chipColor))
+            val chipColor = when (good) {
+                true -> Color(0xFFECFDF5)
+                false -> Color(0xFFFEE2E2)
+                else -> Color(0xFFF1F5F9)
+            }
+            AssistChip(
+                onClick = {},
+                label = { Text(delta) },
+                colors = AssistChipDefaults.assistChipColors(containerColor = chipColor)
+            )
         }
     }
 }
@@ -155,20 +240,23 @@ fun SimpleLineChart(values: List<Float>, values2: List<Float>? = null) {
     }
 }
 
-// ---------------- Supplier Dashboard ----------------
+/* ---------------- Supplier Dashboard ---------------- */
+
 data class SupplierRow(val name: String, val score: Int, val data: Int, val status: String)
 
 @Composable
 fun SupplierDashboardScreen() {
     var filter by remember { mutableStateOf("All") }
     val rows = remember {
-        mutableStateOf(listOf(
-            SupplierRow("Alpha Coils", 72, 90, "Active"),
-            SupplierRow("Beta Ltd", 54, 60, "Onboarding"),
-            SupplierRow("Gamma Gears", 81, 100, "Active"),
-            SupplierRow("Delta Castings", 65, 80, "Active"),
-            SupplierRow("Epsilon Plastics", 43, 40, "At Risk")
-        ))
+        mutableStateOf(
+            listOf(
+                SupplierRow("Alpha Coils", 72, 90, "Active"),
+                SupplierRow("Beta Ltd", 54, 60, "Onboarding"),
+                SupplierRow("Gamma Gears", 81, 100, "Active"),
+                SupplierRow("Delta Castings", 65, 80, "Active"),
+                SupplierRow("Epsilon Plastics", 43, 40, "At Risk")
+            )
+        )
     }
     val active = rows.value.count { it.status == "Active" }
     val coverage = (rows.value.map { it.data }.average()).toInt()
@@ -176,19 +264,21 @@ fun SupplierDashboardScreen() {
     val openTasks = rows.value.count { it.data < 80 }
 
     LazyColumn(Modifier.fillMaxSize().padding(16.dp)) {
-        item { Text("Supplier Portal — Overview", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold) }
-        item { Spacer(Modifier.height(8.dp)) }
+        item {
+            Text("Supplier Portal — Overview", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+            Spacer(Modifier.height(8.dp))
+        }
         item {
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                KPI("Active Suppliers", active.toString(), "Total in program", null)
-                KPI("Verified Data Coverage", "$coverage%", "Avg completeness", true)
+                KPI("Active Suppliers", active.toString(), "Total in program", null, Modifier.weight(1f))
+                KPI("Verified Data Coverage", "$coverage%", "Avg completeness", true, Modifier.weight(1f))
             }
         }
         item { Spacer(Modifier.height(12.dp)) }
         item {
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                KPI("Avg Decarb Score", "$avgScore", "Onboarded suppliers", true)
-                KPI("Open Improvement Tasks", openTasks.toString(), "Below 80% data", null)
+                KPI("Avg Decarb Score", "$avgScore", "Onboarded suppliers", true, Modifier.weight(1f))
+                KPI("Open Improvement Tasks", openTasks.toString(), "Below 80% data", null, Modifier.weight(1f))
             }
         }
         item { Spacer(Modifier.height(16.dp)) }
@@ -205,7 +295,7 @@ fun SupplierDashboardScreen() {
                     }
                     Spacer(Modifier.height(8.dp))
                     rows.value
-                        .filter { filter == "All" || it.status == filter }
+                        .filter { filter == "All" || (it.status == filter) }  // use ||, not `or`
                         .forEach { r -> SupplierCard(r) }
                 }
             }
@@ -216,10 +306,13 @@ fun SupplierDashboardScreen() {
 @Composable
 fun FilterChip(text: String, current: String, onClick: () -> Unit) {
     val selected = text == current
-    AssistChip(onClick = onClick, label = { Text(text) },
+    AssistChip(
+        onClick = onClick,
+        label = { Text(text) },
         colors = AssistChipDefaults.assistChipColors(
             containerColor = if (selected) MaterialTheme.colorScheme.primary.copy(alpha = 0.15f) else Color(0xFFF1F5F9)
-        ))
+        )
+    )
 }
 
 @Composable
@@ -237,22 +330,29 @@ fun SupplierCard(r: SupplierRow) {
     }
 }
 
-// ---------------- Retrofits ----------------
+/* ---------------- Retrofits ---------------- */
+
 data class RetrofitItem(val supplier: String, val type: String, val abatement: Float, val status: String, val updated: String)
 
 @Composable
 fun RetrofitsScreen() {
     var items by remember {
-        mutableStateOf(listOf(
-            RetrofitItem("Alpha Coils","VFD for Motors",120f,"In Progress","2025-10-10"),
-            RetrofitItem("Beta Ltd","Solar Rooftop",240f,"Pending","2025-10-18"),
-            RetrofitItem("Gamma Gears","LED Lighting",35f,"Completed","2025-09-28"),
-            RetrofitItem("Delta Castings","Heat Pump",180f,"In Progress","2025-10-22")
-        ))
+        mutableStateOf(
+            listOf(
+                RetrofitItem("Alpha Coils","VFD for Motors",120f,"In Progress","2025-10-10"),
+                RetrofitItem("Beta Ltd","Solar Rooftop",240f,"Pending","2025-10-18"),
+                RetrofitItem("Gamma Gears","LED Lighting",35f,"Completed","2025-09-28"),
+                RetrofitItem("Delta Castings","Heat Pump",180f,"In Progress","2025-10-22")
+            )
+        )
     }
     var show by remember { mutableStateOf(false) }
     Column(Modifier.fillMaxSize().padding(16.dp)) {
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             Text("Retrofit Requests", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
             Button(onClick = { show = true }) { Text("+ Request Retrofit") }
         }
@@ -261,19 +361,27 @@ fun RetrofitsScreen() {
             items(items) { r -> RetrofitRow(r) }
         }
     }
-    if (show) NewRetrofitDialog(onDismiss = { show = false }, onSubmit = { supplier, type, abate ->
-        items = listOf(RetrofitItem(supplier, type, abate, "Pending", java.time.LocalDate.now().toString())) + items
-        show = false
-    })
+    if (show) NewRetrofitDialog(
+        onDismiss = { show = false },
+        onSubmit = { supplier, type, abate ->
+            items = listOf(
+                RetrofitItem(supplier, type, abate, "Pending", java.time.LocalDate.now().toString())
+            ) + items
+            show = false
+        }
+    )
 }
 
 @Composable
 fun RetrofitRow(r: RetrofitItem) {
     Card(Modifier.fillMaxWidth()) {
         Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
-            Column(Modifier.weight(1f)) { Text(r.supplier, fontWeight = FontWeight.SemiBold); Text(r.type, color = Color(0xFF64748B)) }
+            Column(Modifier.weight(1f)) {
+                Text(r.supplier, fontWeight = FontWeight.SemiBold)
+                Text(r.type, color = Color(0xFF64748B))
+            }
             Text("${r.abatement.toInt()} tCO₂e/yr", Modifier.padding(end = 12.dp))
-            AssistChip(onClick = {}, label = { Text(r.status) }, colors = AssistChipDefaults.assistChipColors())
+            AssistChip(onClick = {}, label = { Text(r.status) })
         }
     }
 }
@@ -285,22 +393,30 @@ fun NewRetrofitDialog(onDismiss: () -> Unit, onSubmit: (String,String,Float) -> 
     var abate by remember { mutableStateOf("") }
     AlertDialog(
         onDismissRequest = onDismiss,
-        confirmButton = { Button(onClick = { val a = abate.toFloatOrNull() ?: 0f; if (supplier.isNotBlank() && a > 0) onSubmit(supplier, type, a) }) { Text("Submit") } },
+        confirmButton = {
+            Button(onClick = {
+                val a = abate.toFloatOrNull() ?: 0f
+                if (supplier.isNotBlank() && a > 0) onSubmit(supplier, type, a)
+            }) { Text("Submit") }
+        },
         dismissButton = { OutlinedButton(onClick = onDismiss) { Text("Cancel") } },
         title = { Text("Request New Retrofit") },
-        text = { Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            OutlinedTextField(value = supplier, onValueChange = { supplier = it }, label = { Text("Supplier Name") })
-            OutlinedTextField(value = type, onValueChange = { type = it }, label = { Text("Retrofit Type") })
-            OutlinedTextField(value = abate, onValueChange = { abate = it }, label = { Text("Estimated Abatement (tCO₂e/yr)") })
-        }}
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedTextField(value = supplier, onValueChange = { supplier = it }, label = { Text("Supplier Name") })
+                OutlinedTextField(value = type, onValueChange = { type = it }, label = { Text("Retrofit Type") })
+                OutlinedTextField(value = abate, onValueChange = { abate = it }, label = { Text("Estimated Abatement (tCO₂e/yr)") })
+            }
+        }
     )
 }
 
-// ---------------- About ----------------
+/* ---------------- About ---------------- */
+
 @Composable
 fun AboutScreen() {
     Column(Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text("About EcoSphere", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-        Text("SaaS for MSME supply chains. This app includes Home, Corporate & Supplier dashboards, and a Retrofits module with a submission dialog—aligned with your case deck.")
+        Text("SaaS for MSME supply chains. Includes Home, Corporate & Supplier dashboards, plus a Retrofits module.")
     }
 }
