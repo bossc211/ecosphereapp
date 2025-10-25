@@ -60,14 +60,32 @@ fun EcoSphereApp() {
 
 @Composable
 fun BottomBar(nav: NavHostController) {
+    val backStackEntry by nav.currentBackStackEntryAsState()
+
     NavigationBar {
-        NavItem(nav, "home", "Home")
-        NavItem(nav, "dashboard", "Corporate")
-        NavItem(nav, "supplier", "Supplier")
-        NavItem(nav, "retrofits", "Retrofits")
-        NavItem(nav, "about", "About")
+        @Composable
+        fun BarItem(route: String, label: String) {
+            val selected = backStackEntry?.destination?.route == route
+            NavigationBarItem(
+                selected = selected,
+                onClick = { nav.navigate(route) },
+                label = { Text(label) },
+                icon = {
+                    Canvas(Modifier.size(24.dp)) {
+                        drawRect(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
+                    }
+                }
+            )
+        }
+
+        BarItem("home", "Home")
+        BarItem("dashboard", "Corporate")
+        BarItem("supplier", "Supplier")
+        BarItem("retrofits", "Retrofits")
+        BarItem("about", "About")
     }
 }
+
 
 /** Row item for the bottom bar.
  *  NOTE: We fully qualify RowScope here to avoid any import ambiguity. */
@@ -286,9 +304,16 @@ fun SupplierDashboardScreen() {
                         FilterChip("At Risk", filter) { filter = "At Risk" }
                     }
                     Spacer(Modifier.height(8.dp))
-                    rows.value
-                        .filter { filter == "All" || (it.status == filter) }
-                        .forEach { r -> SupplierCard(r) }
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(max = 320.dp),   // keeps the card from getting too tall; adjust as you like
+                        verticalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        items(filtered) { r ->
+                            SupplierCard(r)
+                        }
+                    }
                 }
             }
         }
