@@ -58,65 +58,48 @@ fun EcoSphereApp() {
     }
 }
 
+/* ---------------- Bottom Bar (simplified & safe) ---------------- */
+
 @Composable
 fun BottomBar(nav: NavHostController) {
     val backStackEntry by nav.currentBackStackEntryAsState()
-
-    fun isSelected(route: String) = backStackEntry?.destination?.route == route
+    val currentRoute = backStackEntry?.destination?.route
+    val tabs = listOf(
+        "home" to "Home",
+        "dashboard" to "Corporate",
+        "supplier" to "Supplier",
+        "retrofits" to "Retrofits",
+        "about" to "About"
+    )
 
     NavigationBar {
-        NavigationBarItem(
-            selected = isSelected("home"),
-            onClick = { nav.navigate("home") },
-            label = { Text("Home") },
-            icon = {
-                Canvas(Modifier.size(24.dp)) {
-                    drawRect(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
+        tabs.forEach { (route, label) ->
+            val selected = currentRoute == route
+            NavigationBarItem(
+                selected = selected,
+                onClick = {
+                    nav.navigate(route) {
+                        launchSingleTop = true
+                        popUpTo(nav.graph.startDestinationId) { saveState = true }
+                        restoreState = true
+                    }
+                },
+                label = { Text(label) },
+                icon = {
+                    // simple placeholder icon using Canvas (purely composable-safe)
+                    Canvas(Modifier.size(24.dp)) {
+                        drawRect(
+                            if (selected) MaterialTheme.colorScheme.primary.copy(alpha = 0.35f)
+                            else MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
+                        )
+                    }
                 }
-            }
-        )
-        NavigationBarItem(
-            selected = isSelected("dashboard"),
-            onClick = { nav.navigate("dashboard") },
-            label = { Text("Corporate") },
-            icon = {
-                Canvas(Modifier.size(24.dp)) {
-                    drawRect(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
-                }
-            }
-        )
-        NavigationBarItem(
-            selected = isSelected("supplier"),
-            onClick = { nav.navigate("supplier") },
-            label = { Text("Supplier") },
-            icon = {
-                Canvas(Modifier.size(24.dp)) {
-                    drawRect(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
-                }
-            }
-        )
-        NavigationBarItem(
-            selected = isSelected("retrofits"),
-            onClick = { nav.navigate("retrofits") },
-            label = { Text("Retrofits") },
-            icon = {
-                Canvas(Modifier.size(24.dp)) {
-                    drawRect(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
-                }
-            }
-        )
-        NavigationBarItem(
-            selected = isSelected("about"),
-            onClick = { nav.navigate("about") },
-            label = { Text("About") },
-            icon = {
-                Canvas(Modifier.size(24.dp)) {
-                    drawRect(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
-                }
-            }
-        )
+            )
+        }
     }
 }
+
+/* ---------------- Home ---------------- */
 
 @Composable
 fun HomeScreen(nav: NavHostController) {
@@ -128,21 +111,17 @@ fun HomeScreen(nav: NavHostController) {
                 fontWeight = FontWeight.ExtraBold
             )
         }
+        item { Spacer(Modifier.height(6.dp)) }
+        item { Text("Measure, optimize and finance Scope-3 decarbonization by activating MSME suppliers.") }
+        item { Spacer(Modifier.height(12.dp)) }
         item {
-            Spacer(Modifier.height(6.dp))
-            Text("Measure, optimize and finance Scope-3 decarbonization by activating MSME suppliers.")
-        }
-        item {
-            Spacer(Modifier.height(12.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Button(onClick = { nav.navigate("dashboard") }) { Text("Corporate Dashboard") }
                 OutlinedButton(onClick = { nav.navigate("supplier") }) { Text("Supplier Dashboard") }
             }
         }
-        item {
-            Spacer(Modifier.height(16.dp))
-            Text("Solution: Capture → Optimize → Enable → Finance", fontWeight = FontWeight.SemiBold)
-        }
+        item { Spacer(Modifier.height(16.dp)) }
+        item { Text("Solution: Capture → Optimize → Enable → Finance", fontWeight = FontWeight.SemiBold) }
         item {
             Text(
                 "• Capture & validate data from invoices/meters\n" +
@@ -265,15 +244,13 @@ data class SupplierRow(val name: String, val score: Int, val data: Int, val stat
 @Composable
 fun SupplierDashboardScreen() {
     var filter by remember { mutableStateOf("All") }
-    val rows by remember {
-        mutableStateOf(
-            listOf(
-                SupplierRow("Alpha Coils", 72, 90, "Active"),
-                SupplierRow("Beta Ltd", 54, 60, "Onboarding"),
-                SupplierRow("Gamma Gears", 81, 100, "Active"),
-                SupplierRow("Delta Castings", 65, 80, "Active"),
-                SupplierRow("Epsilon Plastics", 43, 40, "At Risk")
-            )
+    val rows = remember {
+        listOf(
+            SupplierRow("Alpha Coils", 72, 90, "Active"),
+            SupplierRow("Beta Ltd", 54, 60, "Onboarding"),
+            SupplierRow("Gamma Gears", 81, 100, "Active"),
+            SupplierRow("Delta Castings", 65, 80, "Active"),
+            SupplierRow("Epsilon Plastics", 43, 40, "At Risk")
         )
     }
     val active = rows.count { it.status == "Active" }
@@ -315,7 +292,7 @@ fun SupplierDashboardScreen() {
 
                     val filteredList = rows.filter { filter == "All" || it.status == filter }
 
-                    // Render items in a clear composable scope (no shadowing)
+                    // Nested LazyColumn keeps each row in a clean composable scope
                     LazyColumn(
                         modifier = Modifier
                             .fillMaxWidth()
