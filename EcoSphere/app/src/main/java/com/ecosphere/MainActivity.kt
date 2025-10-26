@@ -23,6 +23,8 @@ import androidx.navigation.compose.rememberNavController
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.Scaffold
 
 
 class MainActivity : ComponentActivity() {
@@ -36,7 +38,6 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun EcoSphereApp() {
     val nav = rememberNavController()
-    var selectedRoute by remember { mutableStateOf("home") }
 
     MaterialTheme(
         colorScheme = lightColorScheme(
@@ -46,77 +47,7 @@ fun EcoSphereApp() {
     ) {
         Scaffold(
             topBar = { TopAppBar(title = { Text("EcoSphere") }) },
-
-            // ✅ Inline bottom bar (NO separate function)
-            bottomBar = {
-                NavigationBar {
-                    NavigationBarItem(
-                        selected = selectedRoute == "home",
-                        onClick = {
-                            selectedRoute = "home"
-                            nav.navigate("home") {
-                                launchSingleTop = true
-                                popUpTo(nav.graph.startDestinationId) { saveState = true }
-                                restoreState = true
-                            }
-                        },
-                        label = { Text("Home") },
-                        icon = { Canvas(Modifier.size(24.dp)) { drawRect(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)) } }
-                    )
-                    NavigationBarItem(
-                        selected = selectedRoute == "dashboard",
-                        onClick = {
-                            selectedRoute = "dashboard"
-                            nav.navigate("dashboard") {
-                                launchSingleTop = true
-                                popUpTo(nav.graph.startDestinationId) { saveState = true }
-                                restoreState = true
-                            }
-                        },
-                        label = { Text("Corporate") },
-                        icon = { Canvas(Modifier.size(24.dp)) { drawRect(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)) } }
-                    )
-                    NavigationBarItem(
-                        selected = selectedRoute == "supplier",
-                        onClick = {
-                            selectedRoute = "supplier"
-                            nav.navigate("supplier") {
-                                launchSingleTop = true
-                                popUpTo(nav.graph.startDestinationId) { saveState = true }
-                                restoreState = true
-                            }
-                        },
-                        label = { Text("Supplier") },
-                        icon = { Canvas(Modifier.size(24.dp)) { drawRect(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)) } }
-                    )
-                    NavigationBarItem(
-                        selected = selectedRoute == "retrofits",
-                        onClick = {
-                            selectedRoute = "retrofits"
-                            nav.navigate("retrofits") {
-                                launchSingleTop = true
-                                popUpTo(nav.graph.startDestinationId) { saveState = true }
-                                restoreState = true
-                            }
-                        },
-                        label = { Text("Retrofits") },
-                        icon = { Canvas(Modifier.size(24.dp)) { drawRect(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)) } }
-                    )
-                    NavigationBarItem(
-                        selected = selectedRoute == "about",
-                        onClick = {
-                            selectedRoute = "about"
-                            nav.navigate("about") {
-                                launchSingleTop = true
-                                popUpTo(nav.graph.startDestinationId) { saveState = true }
-                                restoreState = true
-                            }
-                        },
-                        label = { Text("About") },
-                        icon = { Canvas(Modifier.size(24.dp)) { drawRect(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)) } }
-                    )
-                }
-            }
+            bottomBar = { /* temporarily empty to unblock build */ }
         ) { inner ->
             NavHost(
                 navController = nav,
@@ -148,11 +79,19 @@ fun HomeScreen(nav: NavHostController) {
         }
         item { Spacer(Modifier.height(6.dp)) }
         item { Text("Measure, optimize and finance Scope-3 decarbonization by activating MSME suppliers.") }
-        item { Spacer(Modifier.height(12.dp)) }
+        
         item {
+            Spacer(Modifier.height(12.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Button(onClick = { nav.navigate("dashboard") }) { Text("Corporate Dashboard") }
                 OutlinedButton(onClick = { nav.navigate("supplier") }) { Text("Supplier Dashboard") }
+            }
+        }
+        item {
+            Spacer(Modifier.height(8.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedButton(onClick = { nav.navigate("retrofits") }) { Text("Retrofits") }
+                OutlinedButton(onClick = { nav.navigate("about") }) { Text("About") }
             }
         }
         item { Spacer(Modifier.height(16.dp)) }
@@ -332,9 +271,7 @@ fun SupplierDashboardScreen() {
 
                     // Nested LazyColumn keeps each row in a clean composable scope
                     LazyColumn(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .heightIn(max = 320.dp),
+                        modifier = Modifier.fillMaxWidth().heightIn(max = 320.dp),
                         verticalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
                         items(filteredList) { supplier ->
