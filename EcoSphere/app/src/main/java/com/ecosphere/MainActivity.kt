@@ -1,6 +1,5 @@
 package com.ecosphere
 
-import androidx.navigation.compose.currentBackStackEntryAsState
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -21,7 +20,6 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.compose.currentBackStackEntryAsState
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -63,37 +61,72 @@ fun EcoSphereApp() {
 
 @Composable
 fun BottomBar(nav: NavHostController) {
-    val backStackEntry by androidx.navigation.compose.currentBackStackEntryAsState()
-    val currentRoute = backStackEntry?.destination?.route
+    // Keep local selection state instead of currentBackStackEntryAsState
+    var selectedRoute by remember { mutableStateOf("home") }
 
     NavigationBar {
         NavigationBarItem(
-            selected = currentRoute == "home",
-            onClick = { nav.navigate("home") { launchSingleTop = true; popUpTo(nav.graph.startDestinationId) { saveState = true }; restoreState = true } },
+            selected = selectedRoute == "home",
+            onClick = {
+                selectedRoute = "home"
+                nav.navigate("home") {
+                    launchSingleTop = true
+                    popUpTo(nav.graph.startDestinationId) { saveState = true }
+                    restoreState = true
+                }
+            },
             label = { Text("Home") },
             icon = { Canvas(Modifier.size(24.dp)) { drawRect(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)) } }
         )
         NavigationBarItem(
-            selected = currentRoute == "dashboard",
-            onClick = { nav.navigate("dashboard") { launchSingleTop = true; popUpTo(nav.graph.startDestinationId) { saveState = true }; restoreState = true } },
+            selected = selectedRoute == "dashboard",
+            onClick = {
+                selectedRoute = "dashboard"
+                nav.navigate("dashboard") {
+                    launchSingleTop = true
+                    popUpTo(nav.graph.startDestinationId) { saveState = true }
+                    restoreState = true
+                }
+            },
             label = { Text("Corporate") },
             icon = { Canvas(Modifier.size(24.dp)) { drawRect(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)) } }
         )
         NavigationBarItem(
-            selected = currentRoute == "supplier",
-            onClick = { nav.navigate("supplier") { launchSingleTop = true; popUpTo(nav.graph.startDestinationId) { saveState = true }; restoreState = true } },
+            selected = selectedRoute == "supplier",
+            onClick = {
+                selectedRoute = "supplier"
+                nav.navigate("supplier") {
+                    launchSingleTop = true
+                    popUpTo(nav.graph.startDestinationId) { saveState = true }
+                    restoreState = true
+                }
+            },
             label = { Text("Supplier") },
             icon = { Canvas(Modifier.size(24.dp)) { drawRect(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)) } }
         )
         NavigationBarItem(
-            selected = currentRoute == "retrofits",
-            onClick = { nav.navigate("retrofits") { launchSingleTop = true; popUpTo(nav.graph.startDestinationId) { saveState = true }; restoreState = true } },
+            selected = selectedRoute == "retrofits",
+            onClick = {
+                selectedRoute = "retrofits"
+                nav.navigate("retrofits") {
+                    launchSingleTop = true
+                    popUpTo(nav.graph.startDestinationId) { saveState = true }
+                    restoreState = true
+                }
+            },
             label = { Text("Retrofits") },
             icon = { Canvas(Modifier.size(24.dp)) { drawRect(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)) } }
         )
         NavigationBarItem(
-            selected = currentRoute == "about",
-            onClick = { nav.navigate("about") { launchSingleTop = true; popUpTo(nav.graph.startDestinationId) { saveState = true }; restoreState = true } },
+            selected = selectedRoute == "about",
+            onClick = {
+                selectedRoute = "about"
+                nav.navigate("about") {
+                    launchSingleTop = true
+                    popUpTo(nav.graph.startDestinationId) { saveState = true }
+                    restoreState = true
+                }
+            },
             label = { Text("About") },
             icon = { Canvas(Modifier.size(24.dp)) { drawRect(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)) } }
         )
