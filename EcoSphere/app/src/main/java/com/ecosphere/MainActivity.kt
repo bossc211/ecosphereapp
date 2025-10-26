@@ -20,14 +20,6 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.Scaffold
-import androidx.compose.runtime.Composable
-
-
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -49,7 +41,8 @@ fun EcoSphereApp() {
     ) {
         Scaffold(
             topBar = { TopAppBar(title = { Text("EcoSphere") }) },
-            bottomBar = { /* temporarily empty to unblock build */ }
+            // bottomBar intentionally empty to avoid scope issues until build is green
+            bottomBar = { }
         ) { inner ->
             NavHost(
                 navController = nav,
@@ -66,7 +59,6 @@ fun EcoSphereApp() {
     }
 }
 
-
 /* ---------------- Home ---------------- */
 
 @Composable
@@ -79,31 +71,34 @@ fun HomeScreen(nav: NavHostController) {
                 fontWeight = FontWeight.ExtraBold
             )
         }
-        item { Spacer(Modifier.height(6.dp)) }
-        item { Text("Measure, optimize and finance Scope-3 decarbonization by activating MSME suppliers.") }
-        
+        item { Spacer(Modifier.height(8.dp)) }
         item {
-            Spacer(Modifier.height(12.dp))
+            Text("Measure, optimize and finance Scope-3 decarbonization by activating MSME suppliers.")
+        }
+        item { Spacer(Modifier.height(12.dp)) }
+        item {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Button(onClick = { nav.navigate("dashboard") }) { Text("Corporate Dashboard") }
                 OutlinedButton(onClick = { nav.navigate("supplier") }) { Text("Supplier Dashboard") }
             }
         }
+        item { Spacer(Modifier.height(8.dp)) }
         item {
-            Spacer(Modifier.height(8.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedButton(onClick = { nav.navigate("retrofits") }) { Text("Retrofits") }
                 OutlinedButton(onClick = { nav.navigate("about") }) { Text("About") }
             }
         }
         item { Spacer(Modifier.height(16.dp)) }
-        item { Text("Solution: Capture → Optimize → Enable → Finance", fontWeight = FontWeight.SemiBold) }
+        item {
+            Text("Solution: Capture → Optimize → Enable → Finance", fontWeight = FontWeight.SemiBold)
+        }
         item {
             Text(
                 "• Capture & validate data from invoices/meters\n" +
-                        "• Optimize with hotspot insights & ROI\n" +
-                        "• Enable via marketplace & tools\n" +
-                        "• Finance upgrades with transaction-linked models"
+                "• Optimize with hotspot insights & ROI\n" +
+                "• Enable via marketplace & tools\n" +
+                "• Finance upgrades with transaction-linked models"
             )
         }
     }
@@ -207,10 +202,9 @@ fun SimpleLineChart(values: List<Float>, values2: List<Float>? = null) {
                 val x = padX + i * step
                 val y = padY + (h - 2 * padY) * (1 - (v - min) / (max - min))
                 if (i == 0) p.moveTo(x, y) else p.lineTo(x, y)
+            }
+            return p
         }
-        return p
-}
-
         drawPath(pathFor(values), color = MaterialTheme.colorScheme.primary, alpha = 0.9f)
         values2?.let { drawPath(pathFor(it), color = Color(0xFF94A3B8), alpha = 0.9f) }
     }
@@ -271,9 +265,10 @@ fun SupplierDashboardScreen() {
 
                     val filteredList = rows.filter { filter == "All" || it.status == filter }
 
-                    // Nested LazyColumn keeps each row in a clean composable scope
                     LazyColumn(
-                        modifier = Modifier.fillMaxWidth().heightIn(max = 320.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(max = 320.dp),
                         verticalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
                         items(filteredList) { supplier ->
@@ -346,15 +341,17 @@ fun RetrofitsScreen() {
         }
     }
 
-    if (show) NewRetrofitDialog(
-        onDismiss = { show = false },
-        onSubmit = { supplier, type, abate ->
-            retrofitItems = listOf(
-                RetrofitItem(supplier, type, abate, "Pending", java.time.LocalDate.now().toString())
-            ) + retrofitItems
-            show = false
-        }
-    )
+    if (show) {
+        NewRetrofitDialog(
+            onDismiss = { show = false },
+            onSubmit = { supplier, type, abate ->
+                retrofitItems = listOf(
+                    RetrofitItem(supplier, type, abate, "Pending", java.time.LocalDate.now().toString())
+                ) + retrofitItems
+                show = false
+            }
+        )
+    }
 }
 
 @Composable
