@@ -36,6 +36,8 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun EcoSphereApp() {
     val nav = rememberNavController()
+    var selectedRoute by remember { mutableStateOf("home") }
+
     MaterialTheme(
         colorScheme = lightColorScheme(
             primary = Color(0xFF059669),
@@ -44,7 +46,77 @@ fun EcoSphereApp() {
     ) {
         Scaffold(
             topBar = { TopAppBar(title = { Text("EcoSphere") }) },
-            bottomBar = { BottomBar(nav) }
+
+            // ✅ Inline bottom bar (NO separate function)
+            bottomBar = {
+                NavigationBar {
+                    NavigationBarItem(
+                        selected = selectedRoute == "home",
+                        onClick = {
+                            selectedRoute = "home"
+                            nav.navigate("home") {
+                                launchSingleTop = true
+                                popUpTo(nav.graph.startDestinationId) { saveState = true }
+                                restoreState = true
+                            }
+                        },
+                        label = { Text("Home") },
+                        icon = { Canvas(Modifier.size(24.dp)) { drawRect(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)) } }
+                    )
+                    NavigationBarItem(
+                        selected = selectedRoute == "dashboard",
+                        onClick = {
+                            selectedRoute = "dashboard"
+                            nav.navigate("dashboard") {
+                                launchSingleTop = true
+                                popUpTo(nav.graph.startDestinationId) { saveState = true }
+                                restoreState = true
+                            }
+                        },
+                        label = { Text("Corporate") },
+                        icon = { Canvas(Modifier.size(24.dp)) { drawRect(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)) } }
+                    )
+                    NavigationBarItem(
+                        selected = selectedRoute == "supplier",
+                        onClick = {
+                            selectedRoute = "supplier"
+                            nav.navigate("supplier") {
+                                launchSingleTop = true
+                                popUpTo(nav.graph.startDestinationId) { saveState = true }
+                                restoreState = true
+                            }
+                        },
+                        label = { Text("Supplier") },
+                        icon = { Canvas(Modifier.size(24.dp)) { drawRect(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)) } }
+                    )
+                    NavigationBarItem(
+                        selected = selectedRoute == "retrofits",
+                        onClick = {
+                            selectedRoute = "retrofits"
+                            nav.navigate("retrofits") {
+                                launchSingleTop = true
+                                popUpTo(nav.graph.startDestinationId) { saveState = true }
+                                restoreState = true
+                            }
+                        },
+                        label = { Text("Retrofits") },
+                        icon = { Canvas(Modifier.size(24.dp)) { drawRect(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)) } }
+                    )
+                    NavigationBarItem(
+                        selected = selectedRoute == "about",
+                        onClick = {
+                            selectedRoute = "about"
+                            nav.navigate("about") {
+                                launchSingleTop = true
+                                popUpTo(nav.graph.startDestinationId) { saveState = true }
+                                restoreState = true
+                            }
+                        },
+                        label = { Text("About") },
+                        icon = { Canvas(Modifier.size(24.dp)) { drawRect(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)) } }
+                    )
+                }
+            }
         ) { inner ->
             NavHost(
                 navController = nav,
@@ -58,81 +130,6 @@ fun EcoSphereApp() {
                 composable("about") { AboutScreen() }
             }
         }
-    }
-}
-
-/* ---------------- Bottom Bar (simplified & safe) ---------------- */
-
-@Composable
-fun BottomBar(nav: NavHostController) {
-    var selectedRoute by remember { mutableStateOf("home") }
-
-    NavigationBar {
-        NavigationBarItem(
-            selected = selectedRoute == "home",
-            onClick = {
-                selectedRoute = "home"
-                nav.navigate("home") {
-                    launchSingleTop = true
-                    popUpTo(nav.graph.startDestinationId) { saveState = true }
-                    restoreState = true
-                }
-            },
-            label = { Text("Home") },
-            icon = { Canvas(Modifier.size(24.dp)) { drawRect(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)) } }
-        )
-        NavigationBarItem(
-            selected = selectedRoute == "dashboard",
-            onClick = {
-                selectedRoute = "dashboard"
-                nav.navigate("dashboard") {
-                    launchSingleTop = true
-                    popUpTo(nav.graph.startDestinationId) { saveState = true }
-                    restoreState = true
-                }
-            },
-            label = { Text("Corporate") },
-            icon = { Canvas(Modifier.size(24.dp)) { drawRect(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)) } }
-        )
-        NavigationBarItem(
-            selected = selectedRoute == "supplier",
-            onClick = {
-                selectedRoute = "supplier"
-                nav.navigate("supplier") {
-                    launchSingleTop = true
-                    popUpTo(nav.graph.startDestinationId) { saveState = true }
-                    restoreState = true
-                }
-            },
-            label = { Text("Supplier") },
-            icon = { Canvas(Modifier.size(24.dp)) { drawRect(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)) } }
-        )
-        NavigationBarItem(
-            selected = selectedRoute == "retrofits",
-            onClick = {
-                selectedRoute = "retrofits"
-                nav.navigate("retrofits") {
-                    launchSingleTop = true
-                    popUpTo(nav.graph.startDestinationId) { saveState = true }
-                    restoreState = true
-                }
-            },
-            label = { Text("Retrofits") },
-            icon = { Canvas(Modifier.size(24.dp)) { drawRect(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)) } }
-        )
-        NavigationBarItem(
-            selected = selectedRoute == "about",
-            onClick = {
-                selectedRoute = "about"
-                nav.navigate("about") {
-                    launchSingleTop = true
-                    popUpTo(nav.graph.startDestinationId) { saveState = true }
-                    restoreState = true
-                }
-            },
-            label = { Text("About") },
-            icon = { Canvas(Modifier.size(24.dp)) { drawRect(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)) } }
-        )
     }
 }
 
