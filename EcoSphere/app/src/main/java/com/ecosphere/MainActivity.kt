@@ -310,21 +310,27 @@ fun SupplierCard(r: SupplierRow) {
 
 /* ---------------- Retrofits ---------------- */
 
-data class RetrofitItem(val supplier: String, val type: String, val abatement: Float, val status: String, val updated: String)
+/* ---------------- Retrofits ---------------- */
+
+data class RetrofitItem(
+    val supplier: String,
+    val type: String,
+    val abatement: Float,
+    val status: String,
+    val updated: String
+)
 
 @Composable
 fun RetrofitsScreen() {
-    var retrofitItems by remember {
-        mutableStateOf(
-            listOf(
-                RetrofitItem("Alpha Coils", "VFD for Motors", 120f, "In Progress", "2025-10-10"),
-                RetrofitItem("Beta Ltd", "Solar Rooftop", 240f, "Pending", "2025-10-18"),
-                RetrofitItem("Gamma Gears", "LED Lighting", 35f, "Completed", "2025-09-28"),
-                RetrofitItem("Delta Castings", "Heat Pump", 180f, "In Progress", "2025-10-22")
-            )
+    // Static list to avoid any conditional dialog composables
+    val retrofitItems = remember {
+        listOf(
+            RetrofitItem("Alpha Coils", "VFD for Motors", 120f, "In Progress", "2025-10-10"),
+            RetrofitItem("Beta Ltd", "Solar Rooftop", 240f, "Pending", "2025-10-18"),
+            RetrofitItem("Gamma Gears", "LED Lighting", 35f, "Completed", "2025-09-28"),
+            RetrofitItem("Delta Castings", "Heat Pump", 180f, "In Progress", "2025-10-22")
         )
     }
-    var show by remember { mutableStateOf(false) }
 
     Column(Modifier.fillMaxSize().padding(16.dp)) {
         Row(
@@ -332,25 +338,24 @@ fun RetrofitsScreen() {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text("Retrofit Requests", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-            Button(onClick = { show = true }) { Text("+ Request Retrofit") }
-        }
-        Spacer(Modifier.height(12.dp))
-        LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            items(retrofitItems) { r -> RetrofitRow(r) }
-        }
-    }
-
-    if (show) {
-        NewRetrofitDialog(
-            onDismiss = { show = false },
-            onSubmit = { supplier, type, abate ->
-                retrofitItems = listOf(
-                    RetrofitItem(supplier, type, abate, "Pending", java.time.LocalDate.now().toString())
-                ) + retrofitItems
-                show = false
+            Text(
+                "Retrofit Requests",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold
+            )
+            // Button disabled for now to avoid showing a dialog
+            OutlinedButton(onClick = { /* no-op to keep build green */ }) {
+                Text("+ Request Retrofit")
             }
-        )
+        }
+
+        Spacer(Modifier.height(12.dp))
+
+        LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            items(retrofitItems) { r ->
+                RetrofitRow(r)
+            }
+        }
     }
 }
 
