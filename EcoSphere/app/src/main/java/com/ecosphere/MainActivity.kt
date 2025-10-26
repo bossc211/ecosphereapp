@@ -20,6 +20,10 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Text
+
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -61,7 +65,6 @@ fun EcoSphereApp() {
 
 @Composable
 fun BottomBar(nav: NavHostController) {
-    // Keep local selection state instead of currentBackStackEntryAsState
     var selectedRoute by remember { mutableStateOf("home") }
 
     NavigationBar {
